@@ -4,6 +4,7 @@ const text = document.getElementById("text");
 const userText = document.getElementById("userText");
 const log = document.getElementById("log");
 
+const searchInput = document.getElementById("searchInput"); // 🔥 เพิ่ม
 const cells = [];
 
 // =========================
@@ -22,6 +23,25 @@ for (let i = 0; i < 120; i++) {
 
     board.appendChild(c);
     cells.push(c);
+}
+
+// =================
+// 🔥 FIX: ค้นหาแล้วเปิดช่อง
+// =================
+function searchOpen() {
+    const val = parseInt(searchInput.value);
+
+    if (!val || val < 1 || val > 120) {
+        alert("กรอกเลข 1 - 120");
+        return;
+    }
+
+    const i = val - 1; // 🔥 แปลงเป็น index
+
+    const cell = cells[i];
+    if (!cell) return;
+
+    openCell(i, cell);
 }
 
 // =================
@@ -48,15 +68,9 @@ async function openCell(i, cell) {
             return;
         }
 
-        // =========================
-        // 🔥 animation ช่อง
-        // =========================
         cell.classList.add("opened");
         cell.innerText = data.reward;
 
-        // =========================
-        // 🔊 เสียง (สุ่มเล็กน้อย)
-        // =========================
         if (data.reward.includes("ไม่ถูกรางวัล") || data.reward === "ว่างเปล่า") {
             soundLose.currentTime = 0;
             soundLose.play();
@@ -65,9 +79,6 @@ async function openCell(i, cell) {
             soundWin.play();
         }
 
-        // =========================
-        // 🎉 confetti ถ้ารางวัลใหญ่
-        // =========================
         if (data.reward.includes("30,000") || data.reward.includes("20,000")) {
             spawnConfetti();
         }
@@ -115,16 +126,6 @@ modal.addEventListener("click", (e) => {
 });
 
 // =================
-// reset UI
-// =================
-function resetBoardUI(rewards) {
-    cells.forEach((c, i) => {
-        c.classList.remove("opened");
-        c.innerText = i + 1;
-    });
-}
-
-// =================
 // realtime
 // =================
 async function updateLog() {
@@ -170,12 +171,18 @@ async function updateLog() {
     }
 }
 
+function resetBoardUI(rewards) {
+    cells.forEach((c, i) => {
+        c.classList.remove("opened");
+        c.innerText = i + 1;
+    });
+}
+
 // โหลดครั้งแรก
 updateLog();
 
 // realtime
 setInterval(updateLog, 2000);
-
 
 // =================
 // copy table
