@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ADMIN PANEL</title>
+
+<style>
+body {
+    font-family: sans-serif;
+    background:
+        radial-gradient(circle at 20% 20%, #1a3a6b, transparent 40%),
+        radial-gradient(circle at 80% 30%, #0f2550, transparent 50%),
+        radial-gradient(circle at bottom, #050d1a, #000);
+    color: white;
+}
+
+select {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #6fd3ff;
+    background: linear-gradient(145deg, #0e2238, #091521);
+    color: #fff;
+}
+
+select option {
+    background: #0b1a2a;
+    color: #fff;
+}
+
+button {
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    background: linear-gradient(145deg, #1b3a5a, #0a1a2b);
+    box-shadow: 0 6px 0 #04101c;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 6px;
+    padding: 10px;
+}
+
+.box {
+    border: 1px solid #6fd3ff;
+    padding: 5px;
+    text-align: center;
+    border-radius: 8px;
+
+    box-shadow:
+        inset 1px 1px 3px rgba(255,255,255,0.1),
+        inset -2px -2px 5px rgba(0,0,0,0.8),
+        0 4px 10px rgba(0,0,0,0.7);
+}
+
+.big { background: linear-gradient(145deg, #ff4d4d, #7a0000); }
+.credit { background: linear-gradient(145deg, #ffd966, #b38f00); color:black;}
+.spin { background: linear-gradient(145deg, #ffa64d, #cc5200); }
+
+.lose {
+    background: linear-gradient(145deg, #cceeff, #66b3ff);
+    color: #003366;
+}
+
+.empty {
+    background: linear-gradient(145deg, #ffffff, #dcdcdc);
+    color: #333;
+}
+
+.summary {
+    margin: 12px;
+    padding: 12px;
+    background: linear-gradient(145deg, #0e2238, #091521);
+    border: 1px solid #6fd3ff;
+    border-radius: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<h2 style="text-align:center;">🔧 ADMIN 120 ช่อง</h2>
+
+<div style="text-align:center; margin-bottom:10px;">
+    <button onclick="goHome()">🏠 กลับหน้าเกม</button>
+    <button onclick="resetAll()">♻️ รีเซ็ต</button>
+
+    <!-- ✅ ปุ่มใหม่ -->
+    <button onclick="fillLose()">❌ ไม่ถูกรางวัลทั้งหมด</button>
+</div>
+
+<div class="grid" id="grid"></div>
+<div class="summary" id="summary"></div>
+
+<script>
+let rewards = {{ rewards | tojson }};
+const grid = document.getElementById("grid");
+
+const stock = {
+    "30,000 ":1,
+    "20,000 ":1,
+    "10,000 ":1,
+    "ฟรีสปินเบท 30":10,
+    "ฟรีสปินเบท 20":10,
+    "ฟรีสปินเบท 10":10,
+    "เครดิตฟรี 300 ":7,
+    "เครดิตฟรี 200 ":10,
+    "เครดิตฟรี 100 ":10,
+};
+
+const options = ["ว่างเปล่า", ...Object.keys(stock), "ไม่ถูกรางวัล"];
+const selects = [];
+
+function getClass(reward) {
+    if (reward === "ว่างเปล่า") return "empty";
+    if (reward.includes("30,000") || reward.includes("20,000") || reward.includes("10,000")) return "big";
+    if (reward.includes("เครดิตฟรี")) return "credit";
+    if (reward.includes("ฟรีสปิน")) return "spin";
+    return "lose";
+}
+
+function countUsed() {
+    let count = {};
+    Object.keys(stock).forEach(k => count[k] = 0);
+
+    rewards.forEach(r => {
+        if (count[r] !== undefined) count[r]++;
+    });
+
+    return count;
+}
+
+for (let i = 0; i < 120; i++) {
+
+    const box = document.createElement("div");
+    box.className = "box";
+
+    const select = document.createElement("select");
+
+    options.forEach(opt => {
+        const o = document.createElement("option");
+        o.value = opt;
+        o.textContent = opt;
+        if (rewards[i] === opt) o.selected = true;
+        select.appendChild(o);
+    });
+
+    box.classList.add(getClass(rewards[i]));
+
+    select.onchange = async () => {
+
+        const prev = rewards[i];
+        const next = select.value;
+
+        let used = countUsed();
+
+        if (stock[next] !== undefined && prev !== next) {
+            if (used[next] >= stock[next]) {
+                alert("❌ รางวัลนี้เต็มแล้ว");
+                select.value = prev;
+                return;
+            }
+        }
+
+        rewards[i] = next;
+
+        box.className = "box";
+        box.classList.add(getClass(next));
+
+        await fetch("/admin/set", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ index: i, reward: next })
+        });
+
+        updateSummary();
+    };
+
+    box.innerHTML = (i + 1);
+    box.appendChild(select);
+
+    grid.appendChild(box);
+    selects.push(select);
+}
+
+/* ✅ ปุ่มใหม่ */
+async function fillLose() {
+
+    for (let i = 0; i < selects.length; i++) {
+
+        if (rewards[i] === "ว่างเปล่า") {
+
+            rewards[i] = "ไม่ถูกรางวัล";
+            selects[i].value = "ไม่ถูกรางวัล";
+
+            const box = selects[i].parentElement;
+            box.className = "box lose";
+
+            await fetch("/admin/set", {
+                method: "POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({ index: i, reward: "ไม่ถูกรางวัล" })
+            });
+        }
+    }
+
+    updateSummary();
+}
+
+function updateSummary() {
+    let count = countUsed();
+
+    let html = "<b>📊 สถานะรางวัล</b><br>";
+
+    Object.keys(stock).forEach(k => {
+        let used = count[k];
+        let left = stock[k] - used;
+        html += `${k} → ใช้ ${used} / เหลือ ${left}<br>`;
+    });
+
+    document.getElementById("summary").innerHTML = html;
+}
+
+updateSummary();
+
+function goHome() {
+    window.location.href = "/";
+}
+
+async function resetAll() {
+    await fetch("/admin/reset", {method:"POST"});
+
+    rewards = new Array(120).fill("ว่างเปล่า");
+
+    selects.forEach((s, i) => {
+        s.value = "ว่างเปล่า";
+        const box = s.parentElement;
+        box.className = "box empty";
+    });
+
+    updateSummary();
+
+    alert("รีเซ็ตเรียบร้อย");
+}
+</script>
+
+</body>
+</html>

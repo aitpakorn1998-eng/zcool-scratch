@@ -1,0 +1,240 @@
+body {
+    margin: 0;
+    font-family: sans-serif;
+
+    /* 🔥 พื้นหลังใหม่เหมือนหน้า admin */
+    background:
+        radial-gradient(circle at 20% 20%, #1a3a6b, transparent 40%),
+        radial-gradient(circle at 80% 30%, #0f2550, transparent 50%),
+        radial-gradient(circle at bottom, #081a33, #020611);
+
+    color: white;
+    overflow: hidden;
+}
+
+.header {
+    text-align: center;
+    padding: 10px;
+    background: #000;
+    border-bottom: 2px solid #6fd3ff;
+}
+
+/* =========================
+   🔥 3D INPUT + BUTTON
+========================= */
+
+.topbar input {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #6fd3ff;
+    background: linear-gradient(145deg, #0e2238, #091521);
+    color: white;
+
+    box-shadow:
+        inset 2px 2px 4px rgba(255,255,255,0.1),
+        inset -2px -2px 4px rgba(0,0,0,0.7),
+        0 4px 10px rgba(0,0,0,0.6);
+
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.topbar input:focus {
+    box-shadow:
+        inset 1px 1px 2px rgba(255,255,255,0.2),
+        inset -1px -1px 2px rgba(0,0,0,0.8),
+        0 0 8px #6fd3ff;
+}
+
+/* 🔘 3D BUTTON */
+.topbar button {
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+
+    background: linear-gradient(145deg, #1b3a5a, #0a1a2b);
+
+    box-shadow:
+        0 6px 0 #04101c,
+        0 8px 15px rgba(0,0,0,0.7);
+
+    transition: all 0.15s ease;
+}
+
+/* hover */
+.topbar button:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        0 7px 0 #04101c,
+        0 10px 18px rgba(0,0,0,0.8);
+}
+
+/* click */
+.topbar button:active {
+    transform: translateY(4px);
+    box-shadow:
+        0 2px 0 #04101c,
+        0 4px 8px rgba(0,0,0,0.6);
+}
+
+/* ========================= */
+
+.topbar {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 6px;
+}
+
+.wrap {
+    display: flex;
+    height: calc(100vh - 110px);
+    position: relative;
+}
+
+.board {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    gap: 2px;
+    padding: 6px;
+}
+
+/* 🔲 ช่องก็เพิ่มมิติเล็กน้อย */
+.cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+
+    background: linear-gradient(145deg, #12283d, #091521);
+    border: 1px solid #6fd3ff;
+    cursor: pointer;
+
+    box-shadow:
+        inset 1px 1px 3px rgba(255,255,255,0.1),
+        inset -2px -2px 5px rgba(0,0,0,0.8),
+        0 3px 6px rgba(0,0,0,0.6);
+
+    transition: all 0.15s ease;
+}
+
+.cell:hover {
+    transform: translateY(-2px);
+}
+
+.opened {
+    background: linear-gradient(145deg, gold, #c9a200);
+    color: black;
+
+    box-shadow:
+        inset 1px 1px 3px rgba(255,255,255,0.6),
+        inset -2px -2px 5px rgba(0,0,0,0.4);
+}
+
+.panel {
+    width: 260px;
+    background: rgba(0,0,0,0.7);
+    padding: 10px;
+    border-left: 2px solid #6fd3ff;
+    overflow-y: auto;
+    font-size: 12px;
+}
+
+.panel h3 {
+    color: #6fd3ff;
+}
+
+.modal {
+    position: absolute;
+    inset: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.6);
+
+    z-index: 9999; /* 🔥 เพิ่ม */
+}
+
+.modal-box {
+    width: 420px;
+    background: linear-gradient(145deg, #0e2238, #091521);
+    border: 2px solid #6fd3ff;
+    border-radius: 15px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    gap: 6px;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,0.9);
+}
+
+.popup-logo {
+    width: 120px;
+}
+
+.popup-user {
+    font-size: 20px;
+    color: #6fd3ff;
+    font-weight: bold;
+}
+
+.popup-result {
+    font-size: 18px;
+}
+/* =========================
+🔥 POPUP ANIMATION
+========================= */
+.modal-box {
+    animation: popIn 0.35s ease;
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0.6);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* =========================
+🔥 เอฟเฟกต์ช่องตอนเปิด
+========================= */
+.cell.opened {
+    animation: glow 0.5s ease;
+}
+
+@keyframes glow {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* =========================
+🔥 confetti (ง่ายๆ)
+========================= */
+.confetti {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: gold;
+    pointer-events: none;
+    animation: fall 1s linear forwards;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(200px) rotate(360deg);
+        opacity: 0;
+    }
+}

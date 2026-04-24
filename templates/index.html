@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ZCOOL SCRATCH</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+/* ✅ เพิ่ม 3D ให้ panel */
+.panel {
+    width: 260px;
+    background: linear-gradient(145deg, #0e2238, #091521);
+    padding: 10px;
+
+    border-left: 2px solid #6fd3ff;
+    border-radius: 12px 0 0 12px;
+
+    box-shadow:
+        inset 2px 2px 6px rgba(255,255,255,0.1),
+        inset -3px -3px 8px rgba(0,0,0,0.8),
+        0 12px 25px rgba(0,0,0,0.9);
+
+    overflow-y: auto;
+    font-size: 12px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">❄️ ZCOOL SCRATCH 120 ❄️</div>
+
+<div class="topbar">
+    <input id="userInput" placeholder="USER">
+    <input id="searchInput" type="number" placeholder="1-120">
+
+    <button onclick="searchOpen()">🔍 เปิด</button>
+    <button onclick="copyBoard()">📋 คัดลอกรูปตาราง</button>
+
+    <button onclick="goAdmin()">⚙️ ADMIN</button>
+</div>
+
+<div class="wrap">
+
+    <div class="board" id="board"></div>
+
+    <div class="panel">
+
+        <h3>🏆 รางวัลใหญ่</h3>
+        <div id="big"></div>
+
+        <h3>🎁 รางวัลปลอบใจ</h3>
+        <div id="small"></div>
+
+        <hr>
+
+        <h3>📊 LOG</h3>
+        <div id="log"></div>
+
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-box">
+
+            <img src="{{ url_for('static', filename='zcool.png') }}" class="popup-logo">
+
+            <div id="userText" class="popup-user"></div>
+            <div id="text" class="popup-result"></div>
+
+            <button onclick="closeModal()">ตกลง</button>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+<script>
+function goAdmin() {
+    window.location.href = "/admin";
+}
+</script>
+
+
+</body>
+</html>
