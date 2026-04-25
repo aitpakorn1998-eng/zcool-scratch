@@ -87,12 +87,10 @@ def login():
         u = request.form.get("user")
         p = request.form.get("pass")
 
-        # ตรวจ user admin
         if u == USERS["admin"]["user"] and p == USERS["admin"]["pass"]:
             session["role"] = "admin"
             return redirect("/")
 
-        # ตรวจ user viewer
         if u == USERS["viewer"]["user"] and p == USERS["viewer"]["pass"]:
             session["role"] = "viewer"
             return redirect("/view")
@@ -102,11 +100,19 @@ def login():
     return render_template("login.html")
 
 
+# ⭐⭐⭐ เพิ่ม ROUTE LOGOUT ————————————————
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")
+# ————————————————————————————————
+
+
 # ================= ROUTE =================
 
 @app.route("/")
 def index():
-    # ถ้าไม่ login → เด้งไป login
+
     if "role" not in session:
         return redirect("/login")
 
@@ -115,7 +121,7 @@ def index():
 
 @app.route("/view")
 def view_only():
-    # ต้องเป็น viewer เท่านั้น
+
     if session.get("role") != "viewer":
         return redirect("/login")
 
@@ -125,13 +131,11 @@ def view_only():
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
 
-    # ⭐ viewer เข้า admin ไม่ได้
     if session.get("role") != "admin":
         return "⛔ ไม่มีสิทธิ์", 403
 
     if request.method == "POST":
         pwd = request.form.get("password")
-        # admin route ใช้ session role แล้ว → ไม่ใช้ password เดิม
         return redirect("/admin")
 
     db = get_db()
@@ -188,7 +192,6 @@ def reset_admin():
 @app.route("/open/<int:i>", methods=["POST"])
 def open_cell(i):
 
-    # ⭐ viewer เปิดช่องไม่ได้
     if session.get("role") != "admin":
         return jsonify({"error": "viewer_not_allowed"}), 403
 
