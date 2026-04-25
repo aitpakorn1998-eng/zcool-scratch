@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.secret_key = "zcool_secret"
 
 TOTAL = 120
-ADMIN_PASSWORD = "1234"
+ADMIN_PASSWORD = "win112233"
 
 reward_pool = [
     ("30,000 ", 1),
