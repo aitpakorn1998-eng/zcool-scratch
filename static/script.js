@@ -215,10 +215,10 @@ function copyBoard() {
     boardClone.style.height = BASE_H + "px";
 
     // =========================
-    // 🔥 ปรับฟอนต์ตัวเลขให้ใหญ่ขึ้น (18px)
+    // 🔥 ปรับฟอนต์ตัวเลขใหญ่ขึ้น
     // =========================
     boardClone.querySelectorAll(".cell").forEach(c => {
-        c.style.fontSize = "20px";    // ← ปรับจาก 13px → 18px
+        c.style.fontSize = "20px";
         c.style.padding = "0";
     });
 
@@ -228,6 +228,7 @@ function copyBoard() {
     // กล่องรางวัล (ขวา)
     // =========================
     const rewardBox = document.createElement("div");
+    rewardBox.style.position = "relative";
     rewardBox.style.minWidth = "260px";
     rewardBox.style.border = "3px solid #6fd3ff";
     rewardBox.style.borderRadius = "12px";
@@ -256,12 +257,36 @@ function copyBoard() {
         </div>
     `;
 
+    // =========================
+    // 🔥 ลายน้ำ (เลื่อนลงด้านล่าง)
+    // =========================
+    const watermarkFull = document.createElement("div");
+
+    watermarkFull.style.position = "absolute";
+    watermarkFull.style.top = "0";
+    watermarkFull.style.left = "0";
+    watermarkFull.style.width = "100%";
+    watermarkFull.style.height = "100%";
+
+    watermarkFull.style.backgroundImage = "url('static/zcool.png')";
+    watermarkFull.style.backgroundSize = "cover";
+
+    // 🔥 จุดที่แก้: เลื่อนลง (จาก center → center 75%)
+    watermarkFull.style.backgroundPosition = "center 75%";
+
+    watermarkFull.style.backgroundRepeat = "no-repeat";
+
+    watermarkFull.style.opacity = "0.12";
+    watermarkFull.style.pointerEvents = "none";
+
+    rewardBox.appendChild(watermarkFull);
+
     wrapper.appendChild(rewardBox);
 
     document.body.appendChild(wrapper);
 
     // =========================
-    // 🔥 SCALE อัตโนมัติให้ตารางไม่ทับกรอบรางวัล
+    // 🔥 SCALE อัตโนมัติ
     // =========================
     const TARGET_W = 1600;
     const TARGET_H = 1000;
@@ -294,7 +319,7 @@ function copyBoard() {
                 await navigator.clipboard.write([
                     new ClipboardItem({ "image/png": blob })
                 ]);
-                alert("📋 คัดลอกภาพสำเร็จ (ฟอนต์ใหญ่ขึ้น)");
+                alert("📋 คัดลอกภาพสำเร็จ ");
             } catch {
                 const a = document.createElement("a");
                 a.href = canvas.toDataURL("image/png");
