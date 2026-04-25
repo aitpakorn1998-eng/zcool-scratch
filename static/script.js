@@ -188,7 +188,102 @@ setInterval(updateLog, 2000);
 // copy table
 // =================
 function copyBoard() {
-    html2canvas(board, {
+
+    const wrapper = document.createElement("div");
+    wrapper.style.display = "flex";
+    wrapper.style.gap = "20px";
+    wrapper.style.padding = "20px";
+    wrapper.style.background = "#0b1a2a";
+    wrapper.style.color = "white";
+    wrapper.style.fontFamily = "sans-serif";
+    wrapper.style.alignItems = "flex-start";
+
+    // =========================
+    // 🔥 CLONE ตาราง
+    // =========================
+    const boardClone = board.cloneNode(true);
+
+    boardClone.style.display = "grid";
+    boardClone.style.gridTemplateColumns = "repeat(12, 1fr)";
+    boardClone.style.gridTemplateRows = "repeat(10, 1fr)";
+    boardClone.style.gap = "2px";
+
+    const BASE_W = 1200;
+    const BASE_H = 1000;
+
+    boardClone.style.width = BASE_W + "px";
+    boardClone.style.height = BASE_H + "px";
+
+    // =========================
+    // 🔥 ปรับฟอนต์ตัวเลขให้ใหญ่ขึ้น (18px)
+    // =========================
+    boardClone.querySelectorAll(".cell").forEach(c => {
+        c.style.fontSize = "20px";    // ← ปรับจาก 13px → 18px
+        c.style.padding = "0";
+    });
+
+    wrapper.appendChild(boardClone);
+
+    // =========================
+    // กล่องรางวัล (ขวา)
+    // =========================
+    const rewardBox = document.createElement("div");
+    rewardBox.style.minWidth = "260px";
+    rewardBox.style.border = "3px solid #6fd3ff";
+    rewardBox.style.borderRadius = "12px";
+    rewardBox.style.padding = "15px";
+    rewardBox.style.background = "linear-gradient(160deg,#0f2439,#091521)";
+    rewardBox.style.fontSize = "20px";
+
+    const big = document.getElementById("big").innerText;
+    const small = document.getElementById("small").innerText;
+
+    rewardBox.innerHTML = `
+        <div style="font-size:20px; margin-bottom:20px; text-align:center; font-weight:bold;">
+            🏆 รางวัลคงเหลือ
+        </div>
+
+        <div>
+            <b>💰 รางวัลใหญ่</b><br>
+            ${big.replaceAll("\n", "<br>")}
+        </div>
+
+        <br>
+
+        <div>
+            <b>🎁 รางวัลทั่วไป</b><br>
+            ${small.replaceAll("\n", "<br>")}
+        </div>
+    `;
+
+    wrapper.appendChild(rewardBox);
+
+    document.body.appendChild(wrapper);
+
+    // =========================
+    // 🔥 SCALE อัตโนมัติให้ตารางไม่ทับกรอบรางวัล
+    // =========================
+    const TARGET_W = 1600;
+    const TARGET_H = 1000;
+
+    const REWARD_W = 280;
+    const GAP = 40;
+
+    const availableW = TARGET_W - REWARD_W - GAP;
+    const availableH = TARGET_H;
+
+    const scaleX = availableW / BASE_W;
+    const scaleY = availableH / BASE_H;
+
+    const scale = Math.min(scaleX, scaleY);
+
+    boardClone.style.transform = `scale(${scale})`;
+    boardClone.style.transformOrigin = "top left";
+
+    // =========================
+    // แคปเป็นภาพ
+    // =========================
+    html2canvas(wrapper, {
         backgroundColor: "#0b1a2a",
         scale: 3,
         useCORS: true
@@ -199,13 +294,15 @@ function copyBoard() {
                 await navigator.clipboard.write([
                     new ClipboardItem({ "image/png": blob })
                 ]);
-                alert("📋 คัดลอกรูปแล้ว");
+                alert("📋 คัดลอกภาพสำเร็จ (ฟอนต์ใหญ่ขึ้น)");
             } catch {
                 const a = document.createElement("a");
                 a.href = canvas.toDataURL("image/png");
-                a.download = "table.png";
+                a.download = "board.png";
                 a.click();
             }
+
+            wrapper.remove();
         });
     });
 }
