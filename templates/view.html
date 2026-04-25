@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ZCOOL SCRATCH VIEW ONLY</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+/* ปิดการคลิกทุกอย่าง */
+.no-click * {
+    pointer-events: none !important;
+}
+
+/* ให้กดได้เฉพาะปุ่มคัดลอก */
+.allow-click {
+    pointer-events: auto !important;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">❄️ ZCOOL SCRATCH (VIEW MODE) ❄️</div>
+
+<div class="topbar no-click">
+
+    <!-- ซ่อนช่อง USER -->
+    <!-- ซ่อนปุ่มเปิด -->
+    <!-- ซ่อนปุ่ม ADMIN -->
+
+    <button class="allow-click" onclick="copyBoard()">📋 คัดลอกรูปตาราง</button>
+
+</div>
+
+<div class="wrap no-click">
+
+    <div class="board" id="board"></div>
+
+    <div class="panel">
+
+        <h3>🏆 รางวัลใหญ่</h3>
+        <div id="big"></div>
+
+        <h3>🎁 รางวัลปลอบใจ</h3>
+        <div id="small"></div>
+
+        <hr>
+
+        <h3>📊 LOG</h3>
+        <div id="log"></div>
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+<script>
+/* ปิดการกดช่อง */
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".cell").forEach(c => {
+        c.onclick = null;
+    });
+
+    updateLog();   // โหลดครั้งแรก
+});
+
+/* รีเฟรชตารางอัตโนมัติทุก 2 วินาที */
+setInterval(updateLog, 2000);
+
+/* ปิดป๊อปอัพ */
+document.getElementById("modal")?.remove();
+
+/* ปิดช่อง userInput */
+document.getElementById("userInput")?.remove();
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") e.preventDefault();
+});
+</script>
+
+</body>
+</html>
