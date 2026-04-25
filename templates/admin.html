@@ -89,7 +89,7 @@ button {
     <!-- ปุ่มของเดิม -->
     <button onclick="fillLose()">❌ ไม่ถูกรางวัลทั้งหมด</button>
 
-    <!-- ✅ ปุ่มใหม่ : สุ่มรางวัลอัตโนมัติ -->
+    <!-- ปุ่มใหม่ -->
     <button onclick="autoRandom()">🎲 สุ่มรางวัลอัตโนมัติ</button>
 </div>
 
@@ -187,13 +187,54 @@ for (let i = 0; i < 120; i++) {
     selects.push(select);
 }
 
-/* ============================
-    ✅ ฟังก์ชันสุ่มรางวัลอัตโนมัติ
-============================= */
+/* ================================
+   🚨 ฟังก์ชันที่แก้ใหม่ตามที่สั่ง
+   — สุ่ม 60 ช่องจาก "ว่างเปล่า"
+================================ */
+async function fillLose() {
+
+    // เก็บเฉพาะช่องที่เป็น "ว่างเปล่า"
+    let emptyList = [];
+    for (let i = 0; i < 120; i++) {
+        if (rewards[i] === "ว่างเปล่า") emptyList.push(i);
+    }
+
+    if (emptyList.length < 60) {
+        alert("❌ ช่องว่างเปล่ามีไม่ถึง 60 ช่อง");
+        return;
+    }
+
+    // สุ่มเลือก 60 ช่องแบบไม่ซ้ำ
+    let pick = emptyList
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 60);
+
+    // อัปเดตเฉพาะช่องที่ถูกสุ่ม
+    for (let idx of pick) {
+
+        rewards[idx] = "ไม่ถูกรางวัล";
+        selects[idx].value = "ไม่ถูกรางวัล";
+
+        const box = selects[idx].parentElement;
+        box.className = "box lose";
+
+        await fetch("/admin/set", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ index: idx, reward: "ไม่ถูกรางวัล" })
+        });
+    }
+
+    updateSummary();
+    alert("✔ สุ่มตั้งค่า 'ไม่ถูกรางวัล' จำนวน 60 ช่องแล้ว");
+}
+
+/* ================================
+   ฟังก์ชันของเดิม autoRandom()
+================================ */
 async function autoRandom() {
     let used = countUsed();
 
-    // สร้างลิสต์รางวัลแบบแตกจำนวน
     let prizePool = [];
     Object.keys(stock).forEach(k => {
         let remain = stock[k] - used[k];
@@ -202,10 +243,8 @@ async function autoRandom() {
         }
     });
 
-    // shuffle
     prizePool.sort(() => Math.random() - 0.5);
 
-    // เติมลงช่องว่างเปล่าเท่านั้น
     for (let i = 0; i < 120 && prizePool.length; i++) {
 
         if (rewards[i] === "ว่างเปล่า") {
@@ -228,30 +267,6 @@ async function autoRandom() {
 
     updateSummary();
     alert("🎉 สุ่มรางวัลสำเร็จ!");
-}
-
-/* ปุ่ม: ไม่ถูกรางวัลทั้งหมด */
-async function fillLose() {
-
-    for (let i = 0; i < selects.length; i++) {
-
-        if (rewards[i] === "ว่างเปล่า") {
-
-            rewards[i] = "ไม่ถูกรางวัล";
-            selects[i].value = "ไม่ถูกรางวัล";
-
-            const box = selects[i].parentElement;
-            box.className = "box lose";
-
-            await fetch("/admin/set", {
-                method: "POST",
-                headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({ index: i, reward: "ไม่ถูกรางวัล" })
-            });
-        }
-    }
-
-    updateSummary();
 }
 
 function updateSummary() {
