@@ -8,12 +8,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
-/* ปิดการคลิกทุกอย่าง */
-.no-click * {
-    pointer-events: none !important;
+/* ❌ เอา no-click เดิมออก แล้วใช้แบบนี้แทน */
+.cell {
+    pointer-events: none; /* ห้ามกดช่อง */
 }
 
-/* ให้กดได้เฉพาะปุ่มคัดลอก */
+/* ให้ปุ่มกดได้ */
 .allow-click {
     pointer-events: auto !important;
 }
@@ -25,17 +25,16 @@
 
 <div class="header">❄️ ZCOOL SCRATCH (VIEW MODE) ❄️</div>
 
-<div class="topbar no-click">
-
-    <!-- ซ่อนช่อง USER -->
-    <!-- ซ่อนปุ่มเปิด -->
-    <!-- ซ่อนปุ่ม ADMIN -->
+<div class="topbar">
 
     <button class="allow-click" onclick="copyBoard()">📋 คัดลอกรูปตาราง</button>
 
+    <!-- ⭐ เพิ่ม logout -->
+    <button class="allow-click" onclick="window.location='/logout'">🚪 ออกจากระบบ</button>
+
 </div>
 
-<div class="wrap no-click">
+<div class="wrap">
 
     <div class="board" id="board"></div>
 
@@ -59,24 +58,18 @@
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 
 <script>
-/* ปิดการกดช่อง */
+/* ⭐ สำคัญ: โหลดข้อมูลเหมือนหน้า user */
 document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".cell").forEach(c => {
-        c.onclick = null;
-    });
-
-    updateLog();   // โหลดครั้งแรก
+    updateLog();  // โหลดครั้งแรก
 });
 
-/* รีเฟรชตารางอัตโนมัติทุก 2 วินาที */
+/* ⭐ realtime เหมือนหน้า user */
 setInterval(updateLog, 2000);
 
-/* ปิดป๊อปอัพ */
+/* ❌ ลบ modal ออก */
 document.getElementById("modal")?.remove();
 
-/* ปิดช่อง userInput */
-document.getElementById("userInput")?.remove();
-
+/* ❌ กัน Enter */
 document.addEventListener("keydown", (e) => {
     if (e.key === "Enter") e.preventDefault();
 });
