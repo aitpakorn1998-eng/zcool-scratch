@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+
+<style>
+body {
+    background:#0d1b2a;
+    color:white;
+    font-family:sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+.box {
+    background:#102437;
+    padding:30px;
+    border-radius:12px;
+    width:300px;
+    text-align:center;
+    box-shadow:0 0 18px #000;
+}
+input {
+    width:90%;
+    padding:10px;
+    margin:10px 0;
+    border-radius:6px;
+    border:none;
+}
+button {
+    width:100%;
+    padding:10px;
+    background:#1e90ff;
+    border:none;
+    color:white;
+    border-radius:6px;
+}
+.error {color:#ff4e4e; margin-top:10px;}
+</style>
+
+</head>
+<body>
+
+<div class="box">
+
+    <h2>🔐 LOGIN</h2>
+
+    <form method="post">
+        <input name="user" placeholder="Username">
+        <input name="pass" placeholder="Password" type="password">
+        <button>เข้าสู่ระบบ</button>
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+    </form>
+
+</div>
+
+</body>
+</html>
