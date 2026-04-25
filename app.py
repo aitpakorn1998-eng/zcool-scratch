@@ -6,7 +6,13 @@ app = Flask(__name__)
 app.secret_key = "zcool_secret"
 
 TOTAL = 120
-ADMIN_PASSWORD = "win112233"
+
+# ============ ⭐ เพิ่มระบบ Users ============
+USERS = {
+    "admin": {"user": "zocoolsup", "pass": "win112233", "role": "admin"},
+    "viewer": {"user": "zocooladmin", "pass": "admin112233", "role": "viewer"}
+}
+# ============================================
 
 reward_pool = [
     ("30,000 ", 1),
@@ -35,6 +41,7 @@ random.shuffle(rewards)
 
 logs = []
 
+
 # ================= DB =================
 
 def get_db():
@@ -44,20 +51,19 @@ def init_db():
     db = get_db()
     c = db.cursor()
 
-    # 🔥 สร้าง table (ถ้ายังไม่มี)
     c.execute("""
     CREATE TABLE IF NOT EXISTS cells (
         id INTEGER PRIMARY KEY,
         reward TEXT,
-        opened INTEGER
+        opened INTEGER,
+        user TEXT
     )
     """)
 
-    # 🔥 FIX: เพิ่ม column user ถ้ายังไม่มี
     try:
         c.execute("ALTER TABLE cells ADD COLUMN user TEXT")
     except:
-        pass  # มีอยู่แล้วจะ error → ข้าม
+        pass
 
     c.execute("SELECT COUNT(*) FROM cells")
     if c.fetchone()[0] == 0:
@@ -71,29 +77,62 @@ def init_db():
 
 init_db()
 
+
+# ================= ⭐ เพิ่ม ROUTE LOGIN =================
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+
+    if request.method == "POST":
+        u = request.form.get("user")
+        p = request.form.get("pass")
+
+        # ตรวจ user admin
+        if u == USERS["admin"]["user"] and p == USERS["admin"]["pass"]:
+            session["role"] = "admin"
+            return redirect("/")
+
+        # ตรวจ user viewer
+        if u == USERS["viewer"]["user"] and p == USERS["viewer"]["pass"]:
+            session["role"] = "viewer"
+            return redirect("/view")
+
+        return render_template("login.html", error="❌ ชื่อผู้ใช้หรือรหัสผ่านผิด")
+
+    return render_template("login.html")
+
+
 # ================= ROUTE =================
 
 @app.route("/")
 def index():
+    # ถ้าไม่ login → เด้งไป login
+    if "role" not in session:
+        return redirect("/login")
+
     return render_template("index.html")
+
+
+@app.route("/view")
+def view_only():
+    # ต้องเป็น viewer เท่านั้น
+    if session.get("role") != "viewer":
+        return redirect("/login")
+
+    return render_template("view.html")
 
 
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
+
+    # ⭐ viewer เข้า admin ไม่ได้
+    if session.get("role") != "admin":
+        return "⛔ ไม่มีสิทธิ์", 403
+
     if request.method == "POST":
         pwd = request.form.get("password")
-        if pwd == ADMIN_PASSWORD:
-            session["admin"] = True
-            return redirect("/admin")
-
-    if not session.get("admin"):
-        return """
-        <form method="post" style="text-align:center;margin-top:100px;">
-            <h2>🔐 ADMIN LOGIN</h2>
-            <input type="password" name="password" placeholder="password">
-            <button>เข้าสู่ระบบ</button>
-        </form>
-        """
+        # admin route ใช้ session role แล้ว → ไม่ใช้ password เดิม
+        return redirect("/admin")
 
     db = get_db()
     c = db.cursor()
@@ -106,7 +145,8 @@ def admin():
 
 @app.route("/admin/set", methods=["POST"])
 def set_reward():
-    if not session.get("admin"):
+
+    if session.get("role") != "admin":
         return jsonify({"error": "unauthorized"}), 403
 
     data = request.get_json()
@@ -124,7 +164,8 @@ def set_reward():
 
 @app.route("/admin/reset", methods=["POST"])
 def reset_admin():
-    if not session.get("admin"):
+
+    if session.get("role") != "admin":
         return jsonify({"error": "unauthorized"}), 403
 
     db = get_db()
@@ -146,6 +187,11 @@ def reset_admin():
 
 @app.route("/open/<int:i>", methods=["POST"])
 def open_cell(i):
+
+    # ⭐ viewer เปิดช่องไม่ได้
+    if session.get("role") != "admin":
+        return jsonify({"error": "viewer_not_allowed"}), 403
+
     data = request.get_json()
     user = data.get("user")
 
@@ -211,4 +257,3 @@ def stats():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
-    
