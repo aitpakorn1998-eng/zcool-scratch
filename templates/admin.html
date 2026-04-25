@@ -50,7 +50,6 @@ button {
     padding: 5px;
     text-align: center;
     border-radius: 8px;
-
     box-shadow:
         inset 1px 1px 3px rgba(255,255,255,0.1),
         inset -2px -2px 5px rgba(0,0,0,0.8),
@@ -60,12 +59,10 @@ button {
 .big { background: linear-gradient(145deg, #ff4d4d, #7a0000); }
 .credit { background: linear-gradient(145deg, #ffd966, #b38f00); color:black;}
 .spin { background: linear-gradient(145deg, #ffa64d, #cc5200); }
-
 .lose {
     background: linear-gradient(145deg, #cceeff, #66b3ff);
     color: #003366;
 }
-
 .empty {
     background: linear-gradient(145deg, #ffffff, #dcdcdc);
     color: #333;
@@ -89,8 +86,11 @@ button {
     <button onclick="goHome()">🏠 กลับหน้าเกม</button>
     <button onclick="resetAll()">♻️ รีเซ็ต</button>
 
-    <!-- ✅ ปุ่มใหม่ -->
+    <!-- ปุ่มของเดิม -->
     <button onclick="fillLose()">❌ ไม่ถูกรางวัลทั้งหมด</button>
+
+    <!-- ✅ ปุ่มใหม่ : สุ่มรางวัลอัตโนมัติ -->
+    <button onclick="autoRandom()">🎲 สุ่มรางวัลอัตโนมัติ</button>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -187,7 +187,50 @@ for (let i = 0; i < 120; i++) {
     selects.push(select);
 }
 
-/* ✅ ปุ่มใหม่ */
+/* ============================
+    ✅ ฟังก์ชันสุ่มรางวัลอัตโนมัติ
+============================= */
+async function autoRandom() {
+    let used = countUsed();
+
+    // สร้างลิสต์รางวัลแบบแตกจำนวน
+    let prizePool = [];
+    Object.keys(stock).forEach(k => {
+        let remain = stock[k] - used[k];
+        for (let j = 0; j < remain; j++) {
+            prizePool.push(k);
+        }
+    });
+
+    // shuffle
+    prizePool.sort(() => Math.random() - 0.5);
+
+    // เติมลงช่องว่างเปล่าเท่านั้น
+    for (let i = 0; i < 120 && prizePool.length; i++) {
+
+        if (rewards[i] === "ว่างเปล่า") {
+
+            let prize = prizePool.pop();
+
+            rewards[i] = prize;
+            selects[i].value = prize;
+
+            const box = selects[i].parentElement;
+            box.className = "box " + getClass(prize);
+
+            await fetch("/admin/set", {
+                method: "POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({ index: i, reward: prize })
+            });
+        }
+    }
+
+    updateSummary();
+    alert("🎉 สุ่มรางวัลสำเร็จ!");
+}
+
+/* ปุ่ม: ไม่ถูกรางวัลทั้งหมด */
 async function fillLose() {
 
     for (let i = 0; i < selects.length; i++) {
