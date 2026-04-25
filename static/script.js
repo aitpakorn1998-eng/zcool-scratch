@@ -4,7 +4,7 @@ const text = document.getElementById("text");
 const userText = document.getElementById("userText");
 const log = document.getElementById("log");
 
-const searchInput = document.getElementById("searchInput"); // 🔥 เพิ่ม
+const searchInput = document.getElementById("searchInput");
 const cells = [];
 
 // =========================
@@ -13,7 +13,7 @@ const cells = [];
 const soundWin = new Audio("https://www.myinstants.com/media/sounds/tada-fanfare.mp3");
 const soundLose = new Audio("https://www.myinstants.com/media/sounds/fail.mp3");
 
-// 120 ช่อง
+// สร้าง 120 ช่อง
 for (let i = 0; i < 120; i++) {
     const c = document.createElement("div");
     c.className = "cell";
@@ -36,8 +36,11 @@ function searchOpen() {
         return;
     }
 
-    const i = val - 1; // 🔥 แปลงเป็น index
+    // 🚨 เพิ่มกันกดลั่น
+    const ok = confirm(`ต้องการเปิดช่องหมายเลข ${val} ใช่หรือไม่?`);
+    if (!ok) return;
 
+    const i = val - 1;
     const cell = cells[i];
     if (!cell) return;
 
@@ -53,6 +56,10 @@ async function openCell(i, cell) {
     if (!user) return alert("ใส่ USER");
 
     if (cell.classList.contains("opened")) return;
+
+    // 🚨 เพิ่มกันกดลั่น
+    const ok = confirm(`ต้องการเปิดช่องหมายเลข ${i + 1} ใช่หรือไม่?`);
+    if (!ok) return;
 
     try {
         const res = await fetch(`/open/${i}`, {
@@ -199,7 +206,7 @@ function copyBoard() {
     wrapper.style.alignItems = "flex-start";
 
     // =========================
-    // 🔥 CLONE ตาราง
+    // CLONE ตาราง
     // =========================
     const boardClone = board.cloneNode(true);
 
@@ -214,9 +221,7 @@ function copyBoard() {
     boardClone.style.width = BASE_W + "px";
     boardClone.style.height = BASE_H + "px";
 
-    // =========================
-    // 🔥 ปรับฟอนต์ตัวเลขใหญ่ขึ้น
-    // =========================
+    // ปรับฟอนต์ใหญ่ขึ้น
     boardClone.querySelectorAll(".cell").forEach(c => {
         c.style.fontSize = "20px";
         c.style.padding = "0";
@@ -225,7 +230,7 @@ function copyBoard() {
     wrapper.appendChild(boardClone);
 
     // =========================
-    // กล่องรางวัล (ขวา)
+    // กล่องรางวัล
     // =========================
     const rewardBox = document.createElement("div");
     rewardBox.style.position = "relative";
@@ -258,7 +263,7 @@ function copyBoard() {
     `;
 
     // =========================
-    // 🔥 ลายน้ำ (เลื่อนลงด้านล่าง)
+    // ลายน้ำ
     // =========================
     const watermarkFull = document.createElement("div");
 
@@ -271,7 +276,7 @@ function copyBoard() {
     watermarkFull.style.backgroundImage = "url('static/zcool.png')";
     watermarkFull.style.backgroundSize = "cover";
 
-    // 🔥 จุดที่แก้: เลื่อนลง (จาก center → center 75%)
+    // เลื่อนลายน้ำลงด้านล่าง
     watermarkFull.style.backgroundPosition = "center 75%";
 
     watermarkFull.style.backgroundRepeat = "no-repeat";
@@ -286,7 +291,7 @@ function copyBoard() {
     document.body.appendChild(wrapper);
 
     // =========================
-    // 🔥 SCALE อัตโนมัติ
+    // SCALE
     // =========================
     const TARGET_W = 1600;
     const TARGET_H = 1000;
@@ -306,7 +311,7 @@ function copyBoard() {
     boardClone.style.transformOrigin = "top left";
 
     // =========================
-    // แคปเป็นภาพ
+    // แคปภาพ
     // =========================
     html2canvas(wrapper, {
         backgroundColor: "#0b1a2a",
@@ -319,7 +324,7 @@ function copyBoard() {
                 await navigator.clipboard.write([
                     new ClipboardItem({ "image/png": blob })
                 ]);
-                alert("📋 คัดลอกภาพสำเร็จ ");
+                alert("📋 คัดลอกรูปสำเร็จ");
             } catch {
                 const a = document.createElement("a");
                 a.href = canvas.toDataURL("image/png");
